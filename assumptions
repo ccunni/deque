@@ -1,0 +1,6 @@
+- endCol is EXCLUSIVE
+- endRow is simply whatever row endCol is on (not necc exclusive)
+- we will NEVER write to the same row after circling around (endCol should always be after beginCol when on the same row)
+- if a pointer is NULL no space is allocated (RESPONSIBILITY: NULL out all ptrs every time you resize)
+- all rows between b and e are allocated (valid)
+
