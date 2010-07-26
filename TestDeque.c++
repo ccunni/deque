@@ -17,6 +17,7 @@ To test the program:
 #include <algorithm> // copy, count, fill, reverse
 #include <deque>     // deque
 #include <memory>    // allocator
+#include <cstring>   // strcmp
 
 #include "cppunit/extensions/HelperMacros.h" // CPPUNIT_TEST, CPPUNIT_TEST_SUITE, CPPUNIT_TEST_SUITE_END
 #include "cppunit/TestFixture.h"             // TestFixture
@@ -76,23 +77,113 @@ struct TestDeque : CppUnit::TestFixture {
     // test_subscript
     // --------------
 
-    void test_subscript () {
-              C x(10, 2);
-        const C y(10, 2);
-        typename C::reference       v = x[0];
-        typename C::const_reference w = y[0];
-        assert(v == w);}
+    void test_subscript_1() {
+        C x;
+        
+        CPPUNIT_ASSERT(x.size() == 0);
+        
+        unsigned long end = 95;
+
+        // LOADING VALUES IN
+        // Will get the deque 1 away from needing to resize
+        for(unsigned long i = 0; i < end; i++)
+        {
+            x.push_front(i);
+        }
+        //x.info();
+        
+        // CHECKING AT BEFORE RESIZE
+        for(int i=0; i<95; i++)
+        {
+            CPPUNIT_ASSERT(x[i] == 94-i);        
+        }
+        CPPUNIT_ASSERT(x.size() == end);
+        CPPUNIT_ASSERT(x.front() == (int)(end-1));
+        
+        
+        // Will cause resize!
+        x.push_front(95);
+        //x.info();
+        
+        // CHECKING AT AFTER RESIZE
+        CPPUNIT_ASSERT(x.size() == 96);
+        for(int i=0; i<96; i++)
+        {
+            CPPUNIT_ASSERT(x[i] == 95-i);        
+        }
+    }
+    
+    void test_subscript_2() {
+        C x;
+        
+        x.push_front(1);
+        
+        try
+        {
+            int y = x[-1];
+            cout<<"********!!!"<<y<<endl;
+        }
+        catch(std::out_of_range& e)
+        {
+            CPPUNIT_ASSERT(false);
+        }
+    }
 
     // -------
     // test_at
     // -------
 
-    void test_at () {
-              C x(10, 2);
-        const C y(10, 2);
-        typename C::reference       v = x.at(0);
-        typename C::const_reference w = y.at(0);
-        assert(v == w);}
+    void test_at_1() {
+        C x;
+        
+        CPPUNIT_ASSERT(x.size() == 0);
+        
+        unsigned long end = 95;
+
+        // LOADING VALUES IN
+        // Will get the deque 1 away from needing to resize
+        for(unsigned long i = 0; i < end; i++)
+        {
+            x.push_front(i);
+        }
+        //x.info();
+        
+        // CHECKING AT BEFORE RESIZE
+        for(int i=0; i<95; i++)
+        {
+            CPPUNIT_ASSERT(x.at(i) == 94-i);        
+        }
+        CPPUNIT_ASSERT(x.size() == end);
+        CPPUNIT_ASSERT(x.front() == (int)(end-1));
+        
+        
+        // Will cause resize!
+        x.push_front(95);
+        //x.info();
+        
+        // CHECKING AT AFTER RESIZE
+        CPPUNIT_ASSERT(x.size() == 96);
+        for(int i=0; i<96; i++)
+        {
+            CPPUNIT_ASSERT(x.at(i) == 95-i);        
+        }
+    }
+    
+    void test_at_2() {
+        C x;
+        
+        x.push_front(1);
+        
+        try
+        {
+            x.at(1);
+            CPPUNIT_ASSERT(false);
+        }
+        catch(std::out_of_range& e)
+        {
+            CPPUNIT_ASSERT(true);
+        }
+    }
 
     // ---------
     // test_back
@@ -194,67 +285,57 @@ struct TestDeque : CppUnit::TestFixture {
     // test_push_front
     // --------------
 
-    void test_push_front () {
+    void test_push_front_1 () {
         C x;
-        
+        //x.info();
         CPPUNIT_ASSERT(x.size() == 0);
-        CPPUNIT_ASSERT(x.front() == typename C::value_type()); 
-        x.push_front(3);
-        CPPUNIT_ASSERT(x.size() == 1);
-        CPPUNIT_ASSERT(x.front() == 3);
+
+        //will cause it to go up 2 rows, having to do allocation and move beginCol and beginRow correctly
+        for(int i=0; i<16; i++)
+            x.push_front(i);
+        
+        //x.info();
+        CPPUNIT_ASSERT(x.size() == 16);
+        CPPUNIT_ASSERT(x.front() == 15);
         
     }
     
-    void test_push_front_1 () {
-        C x;
-        
-        CPPUNIT_ASSERT(x.size() == 0);
-        CPPUNIT_ASSERT(x.front() == typename C::value_type()); 
-        
-        int end = 57;
-        for(int i = 0; i < end; i++)
-        {
-            x.push_front(i);
-        }
-
-        CPPUNIT_ASSERT(x.size() == (unsigned long)end);
-        CPPUNIT_ASSERT(x.front() == (end-1));
-        CPPUNIT_ASSERT(x.back() == 0);
-        
-        
-        for(int i = 40; i > -1; i--)
-        {
-            x.push_front(i);
-        }
-        
-        CPPUNIT_ASSERT(x.size() == (unsigned long)(41 + end));
-        CPPUNIT_ASSERT(x.front() == 0);
-        CPPUNIT_ASSERT(x.back() == 0);
-        
-        
-    }
-
     void test_push_front_2 () {
         C x;
         
         CPPUNIT_ASSERT(x.size() == 0);
-        CPPUNIT_ASSERT(x.front() == typename C::value_type()); 
         
-        int end = 90;
+        unsigned long end = 95;
+        // Will get the deque 1 away from needing to resize
+        for(unsigned long i = 0; i < end; i++)
+        {
+            x.push_front(i);
+        }
+        //x.info();
+        CPPUNIT_ASSERT(x.size() == end);
+        CPPUNIT_ASSERT(x.front() == (int)(end-1));
+        
+        // Will cause resize!
+        x.push_front(95);
+        //x.info();
+        CPPUNIT_ASSERT(x.size() == 96);
+        CPPUNIT_ASSERT(x.front() == 95);
+    }
+
+    void test_push_front_stress () 
+    {
+        C x;
+        
+        CPPUNIT_ASSERT(x.size() == 0);
+        
+        int end = 1596; // will cause 5 resizes.
         for(int i = 0; i < end; i++)
         {
             x.push_front(i);
         }
     
-        cout<<"size is "<<x.size()<<endl;
         CPPUNIT_ASSERT(x.size() == (unsigned long)end);
         CPPUNIT_ASSERT(x.front() == (end-1));
-        CPPUNIT_ASSERT(x.back() == 0);
-        
-        for(int j = (end-1); j >= 0; j--)
-        {
-            CPPUNIT_ASSERT(x.at(j) == j);
-        }        
     }
 
     // -----------
@@ -336,8 +417,10 @@ struct TestDeque : CppUnit::TestFixture {
 //    CPPUNIT_TEST(test_equality);
 //    CPPUNIT_TEST(test_comparison);
 //    CPPUNIT_TEST(test_assignment);
-//    CPPUNIT_TEST(test_subscript);
-//    CPPUNIT_TEST(test_at);
+    CPPUNIT_TEST(test_subscript_1);
+//    CPPUNIT_TEST(test_subscript_2); //TODO behavior questions
+    CPPUNIT_TEST(test_at_1);
+    CPPUNIT_TEST(test_at_2);
 //    CPPUNIT_TEST(test_back);
 //    CPPUNIT_TEST(test_begin);
 //    CPPUNIT_TEST(test_clear);
@@ -348,9 +431,9 @@ struct TestDeque : CppUnit::TestFixture {
 //    CPPUNIT_TEST(test_insert);
 //    CPPUNIT_TEST(test_pop_back);
 //    CPPUNIT_TEST(test_push_back);
-//    CPPUNIT_TEST(test_push_front);
-//    CPPUNIT_TEST(test_push_front_1);
+    CPPUNIT_TEST(test_push_front_1);
     CPPUNIT_TEST(test_push_front_2);
+    CPPUNIT_TEST(test_push_front_stress);
 //    CPPUNIT_TEST(test_resize);
 //    CPPUNIT_TEST(test_size);
 //    CPPUNIT_TEST(test_swap);
@@ -369,10 +452,10 @@ int main () {
     cout << "TestDeque.c++" << endl;
 
     CppUnit::TextTestRunner tr;
-    //tr.addTest(TestDeque< std::deque<int>                       >::suite());
-    //tr.addTest(TestDeque< std::deque<int, std::allocator<int> > >::suite());
+    tr.addTest(TestDeque< std::deque<int>                       >::suite());
+    tr.addTest(TestDeque< std::deque<int, std::allocator<int> > >::suite());
     tr.addTest(TestDeque<      Deque<int>                       >::suite());
-    //tr.addTest(TestDeque<      Deque<int, std::allocator<int> > >::suite());
+    tr.addTest(TestDeque<      Deque<int, std::allocator<int> > >::suite());
     tr.run();
 
     cout << "Done." << endl;

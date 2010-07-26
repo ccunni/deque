@@ -142,6 +142,26 @@ class Deque {
             return true;}
 
     public:
+    
+        void info () const {
+            vector<size_type> allocatedRows;
+            for(size_type i=0; i<numRows; i++)
+            {
+                if(container[i] != NULL)
+                    allocatedRows.push_back(i);            
+            }
+            
+            cout<<"begin:["<<beginRow<<"]["<<beginCol<<"]\tend:["<<endRow<<"]["<<endCol<<"(exc)]\tnumRows:"<<numRows<<"\tsize:"<<size()<<" allocatedRows:[";
+            
+            typename vector<size_type>::iterator it = allocatedRows.begin();
+            while(it != allocatedRows.end())
+            {
+                cout<<*it<<" ";
+                it++;
+            }
+            cout<<"]"<<endl;
+           
+        }
         // --------
         // iterator
         // --------
@@ -501,8 +521,7 @@ class Deque {
             beginRow = endRow = numRows/2;
             beginCol = endCol = 5;
             
-            container[beginRow][beginCol] = T();
-            
+            // container[beginRow][beginCol] = T(); //TODO -- this isn't really the default behavior... just looked that way in valgrind. outside it gives random garbage i think.. check blackboard for clarification
             assert(valid());}
 
         /**
@@ -537,7 +556,7 @@ class Deque {
             }
             */
             
-            /*
+            
             for(unsigned long i=0; i<numRows; i++)
             {
                 if(container[i] != (T*)NULL)
@@ -545,7 +564,7 @@ class Deque {
                     a.deallocate(container[i], 10);
                 }
             }
-            */
+            
             delete [] container;
             assert(valid());}
 
@@ -569,10 +588,9 @@ class Deque {
          * <your documentation>
          */
         reference operator [] (size_type index) {
-            // <your code>
-            // dummy is just to be able to compile the skeleton, remove it
-            static value_type dummy;
-            return dummy;}
+            bool boundsCheck = false;            
+            return at(index, boundsCheck);
+        }
 
         /**
          * <your documentation>
@@ -587,16 +605,12 @@ class Deque {
         /**
          * <your documentation>
          */
-        reference at (size_type index) {
-            if(index>=size() || index<0)
-                throw -1; //TODO fix this exception
+        reference at (size_type index, bool boundsCheck = true) {
+            if(boundsCheck && (index>=size() || index<0))
+                throw std::out_of_range("Deque::at()"); 
                       
             size_type col = (beginCol + index)%10;
-            size_type row = beginRow + ((beginCol+index)/10);
-            if (row >= numRows)
-            {
-                row = row - numRows;
-            }
+            size_type row = (beginRow + ((beginCol+index)/10)) % numRows;
             
             return container[row][col];}
 
@@ -745,30 +759,43 @@ class Deque {
         // double capacity
         // ---------------
 
+        /**
+         * determine new row ends
+         * make new container
+         * copy old row pointers
+         * update row ends w/ new values
+         * delete old container, wire it up to new bigger container
+         */
         void double_capacity()
         {
             assert(beginRow != endRow);
             
-            unsigned long numRowsTmp = numRows*2;
-            unsigned long beginRowTmp = numRowsTmp/2 - (numRows/2);
-            unsigned long endRowTmp   = beginRowTmp + numRows;
+            unsigned long newNumRows = numRows*2;
+            unsigned long newBeginRow = newNumRows/2 - (numRows/2);
+            unsigned long newEndRow   = newBeginRow + numRows - 1;
             
 
-            T** containerTmp = new T*[numRowsTmp];
+            T** containerTmp = new T*[newNumRows];
+            fill(containerTmp, containerTmp+newNumRows, (T*)NULL); //NULL out outer new container, always!
             
             if(beginRow < endRow)
             {
-                copy(&container[beginRow], &container[endRow], &containerTmp[beginRowTmp]);
+                copy(&container[beginRow], &container[endRow], &containerTmp[newBeginRow]);
             }
             else  //begin > end
             {
-                copy(&container[beginRow], &container[numRows], &containerTmp[beginRowTmp]);
-                copy(&container[0], &container[endRow], &containerTmp[beginRowTmp + (numRows - beginRow)]);
+                copy(&container[beginRow], &container[numRows], &containerTmp[newBeginRow]);
+                
+                //TODO, is endRow+1 right when endCol = 0? (end row is a row by itself... not sure if its even allocated)
+                copy(&container[0], &container[endRow+1], &containerTmp[newBeginRow + (numRows - beginRow)]);
             }
                         
-            numRows = numRowsTmp;
-            beginRow = beginRowTmp;
-            endRow   = endRowTmp;
+            numRows = newNumRows;
+            beginRow = newBeginRow;
+            endRow   = newEndRow;
+            // no need to update column end pointers. they aren't changed
+            
+            
             delete [] container;
             container = containerTmp;
         }
@@ -783,18 +810,15 @@ class Deque {
         void push_back (const_reference) {
             // <your code>
             assert(valid());}
-            
-
-        /**
-         * <your documentation>
-         */
-        void push_front (const_reference item) {
-            unsigned long beginRowTmp = beginRow, beginColTmp = beginCol;
+        
+        void push_front_update_cursors_and_capacity()
+        {
+            size_type beginRowTmp = beginRow, beginColTmp = beginCol;
 
             //decrement beginnings
             if(beginColTmp == 0) //looping back
             {
-                beginColTmp=9;
+                beginColTmp = 9;
                                             
                 if(beginRowTmp == 0)
                     beginRowTmp = numRows-1;
@@ -802,10 +826,10 @@ class Deque {
                     beginRowTmp--;
             
                 if(beginRowTmp == endRow) //do resize?
-                {
+                {                
                     double_capacity();
-                    push_front(item);
-                    return;
+                    push_front_update_cursors_and_capacity(); //start over now that we have the space
+                    return; // don't let the rest of this method execute, assumptions invalidated by resize.
                 }    
                 else if(container[beginRowTmp] == NULL) // do allocation?
                 {
@@ -816,15 +840,24 @@ class Deque {
             {
                 beginColTmp--;
             }
-
+            
             //final new values assigned
             beginRow = beginRowTmp;
             beginCol = beginColTmp;
+        }
+
+        /**
+         * <your documentation>
+         */
+        void push_front (const_reference item) 
+        {
+            push_front_update_cursors_and_capacity();            
             
-            //push
+            // PUSH!
             a.construct(&container[beginRow][beginCol], item);
             
-            assert(valid());}
+            assert(valid());
+        }
 
         // ------
         // resize
@@ -847,14 +880,11 @@ class Deque {
         size_type size () const {
         unsigned long size = 0;
             if(endRow > beginRow){
-                printf("endRow:%d, beginRow:%d\n", (int)endRow, (int)beginRow);
                 size = (endRow - beginRow - 1) * 10;
                 size += endCol;
                 size += 10 - beginCol;
-                cout<<"a case."<<endl;
             }
             else if(endRow < beginRow){
-                cout<<"b case."<<endl;
                 size += 10*(endRow-1);
                 size += endCol;
                 size += 10 - beginCol;

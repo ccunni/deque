@@ -7,4 +7,4 @@
 
 TODO:
 behavior of front and and back when empty && TEST
--- also, set the front dummy element again when emptying out container w/ pops
+-- also, set the front dummy element again when emptying out container w/ pops  !!!! NO ... this is wrong... wait for black board answer
