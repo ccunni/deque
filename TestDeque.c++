@@ -190,6 +190,73 @@ struct TestDeque : CppUnit::TestFixture {
         C x(10, 2);
         x.push_back(3);}
 
+    // --------------
+    // test_push_front
+    // --------------
+
+    void test_push_front () {
+        C x;
+        
+        CPPUNIT_ASSERT(x.size() == 0);
+        CPPUNIT_ASSERT(x.front() == typename C::value_type()); 
+        x.push_front(3);
+        CPPUNIT_ASSERT(x.size() == 1);
+        CPPUNIT_ASSERT(x.front() == 3);
+        
+    }
+    
+    void test_push_front_1 () {
+        C x;
+        
+        CPPUNIT_ASSERT(x.size() == 0);
+        CPPUNIT_ASSERT(x.front() == typename C::value_type()); 
+        
+        int end = 57;
+        for(int i = 0; i < end; i++)
+        {
+            x.push_front(i);
+        }
+
+        CPPUNIT_ASSERT(x.size() == (unsigned long)end);
+        CPPUNIT_ASSERT(x.front() == (end-1));
+        CPPUNIT_ASSERT(x.back() == 0);
+        
+        
+        for(int i = 40; i > -1; i--)
+        {
+            x.push_front(i);
+        }
+        
+        CPPUNIT_ASSERT(x.size() == (unsigned long)(41 + end));
+        CPPUNIT_ASSERT(x.front() == 0);
+        CPPUNIT_ASSERT(x.back() == 0);
+        
+        
+    }
+
+    void test_push_front_2 () {
+        C x;
+        
+        CPPUNIT_ASSERT(x.size() == 0);
+        CPPUNIT_ASSERT(x.front() == typename C::value_type()); 
+        
+        int end = 90;
+        for(int i = 0; i < end; i++)
+        {
+            x.push_front(i);
+        }
+    
+        cout<<"size is "<<x.size()<<endl;
+        CPPUNIT_ASSERT(x.size() == (unsigned long)end);
+        CPPUNIT_ASSERT(x.front() == (end-1));
+        CPPUNIT_ASSERT(x.back() == 0);
+        
+        for(int j = (end-1); j >= 0; j--)
+        {
+            CPPUNIT_ASSERT(x.at(j) == j);
+        }        
+    }
+
     // -----------
     // test_resize
     // -----------
@@ -265,28 +332,31 @@ struct TestDeque : CppUnit::TestFixture {
     // -----
 
     CPPUNIT_TEST_SUITE(TestDeque);
-    CPPUNIT_TEST(test_constructor);
-    CPPUNIT_TEST(test_equality);
-    CPPUNIT_TEST(test_comparison);
-    CPPUNIT_TEST(test_assignment);
-    CPPUNIT_TEST(test_subscript);
-    CPPUNIT_TEST(test_at);
-    CPPUNIT_TEST(test_back);
-    CPPUNIT_TEST(test_begin);
-    CPPUNIT_TEST(test_clear);
-    CPPUNIT_TEST(test_empty);
-    CPPUNIT_TEST(test_end);
-    CPPUNIT_TEST(test_erase);
-    CPPUNIT_TEST(test_front);
-    CPPUNIT_TEST(test_insert);
-    CPPUNIT_TEST(test_pop_back);
-    CPPUNIT_TEST(test_push_back);
-    CPPUNIT_TEST(test_resize);
-    CPPUNIT_TEST(test_size);
-    CPPUNIT_TEST(test_swap);
-    CPPUNIT_TEST(test_iterator);
-    CPPUNIT_TEST(test_const_iterator);
-    CPPUNIT_TEST(test_algorithms);
+//    CPPUNIT_TEST(test_constructor);
+//    CPPUNIT_TEST(test_equality);
+//    CPPUNIT_TEST(test_comparison);
+//    CPPUNIT_TEST(test_assignment);
+//    CPPUNIT_TEST(test_subscript);
+//    CPPUNIT_TEST(test_at);
+//    CPPUNIT_TEST(test_back);
+//    CPPUNIT_TEST(test_begin);
+//    CPPUNIT_TEST(test_clear);
+//    CPPUNIT_TEST(test_empty);
+//    CPPUNIT_TEST(test_end);
+//    CPPUNIT_TEST(test_erase);
+//    CPPUNIT_TEST(test_front);
+//    CPPUNIT_TEST(test_insert);
+//    CPPUNIT_TEST(test_pop_back);
+//    CPPUNIT_TEST(test_push_back);
+//    CPPUNIT_TEST(test_push_front);
+//    CPPUNIT_TEST(test_push_front_1);
+    CPPUNIT_TEST(test_push_front_2);
+//    CPPUNIT_TEST(test_resize);
+//    CPPUNIT_TEST(test_size);
+//    CPPUNIT_TEST(test_swap);
+//    CPPUNIT_TEST(test_iterator);
+//    CPPUNIT_TEST(test_const_iterator);
+//    CPPUNIT_TEST(test_algorithms);
     CPPUNIT_TEST_SUITE_END();};
 
 // ----
@@ -299,10 +369,10 @@ int main () {
     cout << "TestDeque.c++" << endl;
 
     CppUnit::TextTestRunner tr;
-    tr.addTest(TestDeque< std::deque<int>                       >::suite());
-    tr.addTest(TestDeque< std::deque<int, std::allocator<int> > >::suite());
+    //tr.addTest(TestDeque< std::deque<int>                       >::suite());
+    //tr.addTest(TestDeque< std::deque<int, std::allocator<int> > >::suite());
     tr.addTest(TestDeque<      Deque<int>                       >::suite());
-    tr.addTest(TestDeque<      Deque<int, std::allocator<int> > >::suite());
+    //tr.addTest(TestDeque<      Deque<int, std::allocator<int> > >::suite());
     tr.run();
 
     cout << "Done." << endl;

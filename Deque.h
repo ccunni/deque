@@ -27,6 +27,8 @@ using std::rel_ops::operator<=;
 using std::rel_ops::operator>;
 using std::rel_ops::operator>=;
 
+using namespace std;
+
 // -------
 // destroy
 // -------
@@ -125,8 +127,10 @@ class Deque {
         // ----
 
         allocator_type a;
+        T** container;
+        //ends are EXCLUSIVE
+        unsigned long beginRow, endRow, beginCol, endCol, numRows;
 
-        // <your data>
 
     private:
         // -----
@@ -487,8 +491,18 @@ class Deque {
         /**
          * <your documentation>
          */
-        explicit Deque (const allocator_type& a = allocator_type()) {
-            // <your code>
+        explicit Deque (const allocator_type& a = allocator_type()) : a(a){
+            numRows = 10;
+            container = new T*[numRows];
+            fill(container, container+numRows, (T*)NULL); //NULL out outer container, always!
+            
+            //allocating first, ASSUMPTION will be row/col pointers are always within allocated space.
+            container[numRows/2] = this->a.allocate(10);
+            beginRow = endRow = numRows/2;
+            beginCol = endCol = 5;
+            
+            container[beginRow][beginCol] = T();
+            
             assert(valid());}
 
         /**
@@ -513,7 +527,26 @@ class Deque {
          * <your documentation>
          */
         ~Deque () {
-            // <your code>
+            //TODO finish iterator implementation
+            /*
+            Deque::iterator it = this->begin();
+            while(it != this->end())
+            {
+                a.destroy(&(*it));
+                it++;
+            }
+            */
+            
+            /*
+            for(unsigned long i=0; i<numRows; i++)
+            {
+                if(container[i] != (T*)NULL)
+                {
+                    a.deallocate(container[i], 10);
+                }
+            }
+            */
+            delete [] container;
             assert(valid());}
 
         // ----------
@@ -555,10 +588,17 @@ class Deque {
          * <your documentation>
          */
         reference at (size_type index) {
-            // <your code>
-            // dummy is just to be able to compile the skeleton, remove it
-            static value_type dummy;
-            return dummy;}
+            if(index>=size() || index<0)
+                throw -1; //TODO fix this exception
+                      
+            size_type col = (beginCol + index)%10;
+            size_type row = beginRow + ((beginCol+index)/10);
+            if (row >= numRows)
+            {
+                row = row - numRows;
+            }
+            
+            return container[row][col];}
 
         /**
          * <your documentation>
@@ -662,10 +702,8 @@ class Deque {
          * <your documentation>
          */
         reference front () {
-            // <your code>
-            // dummy is just to be able to compile the skeleton, remove it
-            static value_type dummy;
-            return dummy;}
+            return container[beginRow][beginCol];            
+        }
 
         /**
          * <your documentation>
@@ -703,6 +741,38 @@ class Deque {
             // <your code>
             assert(valid());}
 
+        // ---------------
+        // double capacity
+        // ---------------
+
+        void double_capacity()
+        {
+            assert(beginRow != endRow);
+            
+            unsigned long numRowsTmp = numRows*2;
+            unsigned long beginRowTmp = numRowsTmp/2 - (numRows/2);
+            unsigned long endRowTmp   = beginRowTmp + numRows;
+            
+
+            T** containerTmp = new T*[numRowsTmp];
+            
+            if(beginRow < endRow)
+            {
+                copy(&container[beginRow], &container[endRow], &containerTmp[beginRowTmp]);
+            }
+            else  //begin > end
+            {
+                copy(&container[beginRow], &container[numRows], &containerTmp[beginRowTmp]);
+                copy(&container[0], &container[endRow], &containerTmp[beginRowTmp + (numRows - beginRow)]);
+            }
+                        
+            numRows = numRowsTmp;
+            beginRow = beginRowTmp;
+            endRow   = endRowTmp;
+            delete [] container;
+            container = containerTmp;
+        }
+
         // ----
         // push
         // ----
@@ -713,12 +783,47 @@ class Deque {
         void push_back (const_reference) {
             // <your code>
             assert(valid());}
+            
 
         /**
          * <your documentation>
          */
-        void push_front (const_reference) {
-            // <your code>
+        void push_front (const_reference item) {
+            unsigned long beginRowTmp = beginRow, beginColTmp = beginCol;
+
+            //decrement beginnings
+            if(beginColTmp == 0) //looping back
+            {
+                beginColTmp=9;
+                                            
+                if(beginRowTmp == 0)
+                    beginRowTmp = numRows-1;
+                else
+                    beginRowTmp--;
+            
+                if(beginRowTmp == endRow) //do resize?
+                {
+                    double_capacity();
+                    push_front(item);
+                    return;
+                }    
+                else if(container[beginRowTmp] == NULL) // do allocation?
+                {
+                    container[beginRowTmp] = a.allocate(10);
+                }
+            }
+            else
+            {
+                beginColTmp--;
+            }
+
+            //final new values assigned
+            beginRow = beginRowTmp;
+            beginCol = beginColTmp;
+            
+            //push
+            a.construct(&container[beginRow][beginCol], item);
+            
             assert(valid());}
 
         // ------
@@ -740,8 +845,25 @@ class Deque {
          * <your documentation>
          */
         size_type size () const {
-            // <your code>
-            return 0;}
+        unsigned long size = 0;
+            if(endRow > beginRow){
+                printf("endRow:%d, beginRow:%d\n", (int)endRow, (int)beginRow);
+                size = (endRow - beginRow - 1) * 10;
+                size += endCol;
+                size += 10 - beginCol;
+                cout<<"a case."<<endl;
+            }
+            else if(endRow < beginRow){
+                cout<<"b case."<<endl;
+                size += 10*(endRow-1);
+                size += endCol;
+                size += 10 - beginCol;
+                size += 10*(numRows - beginRow);
+            }
+            else { //when they are pointing to the same row
+                size = endCol - beginCol;
+            }
+            return size;}
 
         // ----
         // swap

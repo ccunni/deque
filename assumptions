@@ -4,3 +4,7 @@
 - if a pointer is NULL no space is allocated (RESPONSIBILITY: NULL out all ptrs every time you resize)
 - all rows between b and e are allocated (valid)
 
+
+TODO:
+behavior of front and and back when empty && TEST
+-- also, set the front dummy element again when emptying out container w/ pops
