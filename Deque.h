@@ -102,7 +102,9 @@ class Deque {
         // -----------
 
         /**
-         * <your documentation>
+         * @param lhs the Deque on the left hand side of operator ==
+	 * @param rhs the Deque on the right hand side of operator ==
+	 * @return true if they are equal false otherwise
          */
         friend bool operator == (const Deque& lhs, const Deque& rhs) {
             size_type mysize = lhs.size();
@@ -118,7 +120,9 @@ class Deque {
         // ----------
 
         /**
-         * <your documentation>
+         * @param lhs the Deque on the left hand side of operator <
+	 * @param rhs the Deque on the right hand side of operator <
+	 * @return true if lhs < rhs is true, false otherwise
          */
         friend bool operator < (const Deque& lhs, const Deque& rhs) {
             return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
@@ -129,9 +133,9 @@ class Deque {
         // data
         // ----
 
-        typename allocator_type::template rebind<T*>::other outer_a;
-        allocator_type a;
-        T** container;
+        typename allocator_type::template rebind<T*>::other outer_a;	//allocator of pointers for type T
+        allocator_type a;						//alocator of T's
+        T** container;							//our outer container (rows)
         //ends are EXCLUSIVE
         unsigned long beginRow, endRow, beginCol, endCol, numRows;
 
@@ -141,12 +145,29 @@ class Deque {
         // valid
         // -----
 
+	/*
+	 * @return true if Deque is valid
+         */
         bool valid () const {
-            // <your code>
+            if(size() == 0 && (beginRow != endRow || beginCol != endCol))
+		return false;
+	    if(beginRow == endRow && size() > 10)
+		return false;
+	    if(size() > numRows)
+		return false;
+	    if(*begin() != front() || *end() != back())
+		return false;
+	    if(beginRow == endRow && beginCol > endCol)
+		return false;
+	    if(beginRow < 0 || beginCol < 0 || endRow < 0 || endCol < 0 || size() < 0 || numRows < 0)
+		return false;
             return true;}
 
     public:
     
+        /**
+	 * Prints out useful stats for debuging
+         */
         void info () const {
             vector<size_type> allocatedRows;
             for(size_type i=0; i<numRows; i++)
@@ -187,9 +208,11 @@ class Deque {
                 // operator ==
                 // -----------
 
-                /**
-                 * <your documentation>
-                 */
+	        /**
+	         * @param lhs the iterator on the left hand side of operator ==
+		 * @param rhs the iterator on the right hand side of operator ==
+		 * @return true if lhs == rhs is true, false otherwise
+         	*/
                 friend bool operator == (const iterator& lhs, const iterator& rhs) {
                     return lhs.index == rhs.index && (&(lhs.myDeque) == &(rhs.myDeque));
                 }
@@ -197,9 +220,11 @@ class Deque {
                 // operator +
                 // ----------
 
-                /**
-                 * <your documentation>
-                 */
+	        /**
+		 * Increments the iterator by rhs
+	         * @param lhs the iterator on the left hand side of operator +
+		 * @param rhs the amount to increment by
+         	*/
                 friend iterator operator + (iterator lhs, difference_type rhs) {
                     return lhs += rhs;}
 
@@ -207,9 +232,11 @@ class Deque {
                 // operator -
                 // ----------
 
-                /**
-                 * <your documentation>
-                 */
+	        /**
+		 * Decrements the iterator by rhs
+	         * @param lhs the iterator on the left hand side of operator +
+		 * @param rhs the amount to decrement by
+         	*/
                 friend iterator operator - (iterator lhs, difference_type rhs) {
                     return lhs -= rhs;}
 
@@ -218,14 +245,17 @@ class Deque {
                 // data
                 // ----
 
-                size_type index;
-                Deque& myDeque;
+                size_type index;	//index to the item in Deque we are pointing at
+                Deque& myDeque;		//reference to the pointer which the iterator is operating on
 
             private:
                 // -----
                 // valid
                 // -----
 
+	        /**
+		 * @return true if the iterator is valid
+         	*/
                 bool valid () const {
                     return index >= 0 && myDeque.valid();
                 }
@@ -235,9 +265,10 @@ class Deque {
                 // constructor
                 // -----------
 
-                /**
-                 * <your documentation>
-                 */
+	        /**
+	         * @param myDeque the Deque to iterator over and point to
+		 * @param index the index location in myDeque to point at initially
+         	*/
                 iterator (Deque& myDeque, size_type index) : index(index), myDeque(myDeque)
                 {
                     assert(valid());
@@ -253,7 +284,8 @@ class Deque {
                 // ----------
 
                 /**
-                 * <your documentation>
+		 * @pre iterator is valid, pointing to an instance of Deque, within that Deque's range
+		 * @return the element which this iterator is currently pointing at
                  */
                 reference operator * () const {
                     return myDeque[index];
@@ -264,7 +296,8 @@ class Deque {
                 // -----------
 
                 /**
-                 * <your documentation>
+		 * @pre iterator is valid, pointing to an instance of Deque, within that Deque's range
+		 * @return dereferenced element with access to members
                  */
                 pointer operator -> () const {
                     return &**this;}
@@ -274,7 +307,8 @@ class Deque {
                 // -----------
 
                 /**
-                 * <your documentation>
+                 * Increments the iterator one place
+		 * @return the iterator after being incremented
                  */
                 iterator& operator ++ () {
                     index++;
@@ -282,7 +316,8 @@ class Deque {
                     return *this;}
 
                 /**
-                 * <your documentation>
+                 * Increments the iterator one place
+		 * @return the iterator before being incremented
                  */
                 iterator operator ++ (int) {
                     iterator x = *this;
@@ -295,7 +330,8 @@ class Deque {
                 // -----------
 
                 /**
-                 * <your documentation>
+                 * Decrements the iterator one place
+		 * @return the iterator after being decremented
                  */
                 iterator& operator -- () {
                     index--;
@@ -303,7 +339,8 @@ class Deque {
                     return *this;}
 
                 /**
-                 * <your documentation>
+                 * Decrements the iterator one place
+		 * @return the iterator before being decremented
                  */
                 iterator operator -- (int) {
                     iterator x = *this;
@@ -316,7 +353,9 @@ class Deque {
                 // -----------
 
                 /**
-                 * <your documentation>
+                 * Increments the iterator by d
+		 * @param d the amount to increment by
+		 * @return the iterator after being incremented
                  */
                 iterator& operator += (difference_type d) {
                     index += d;
@@ -328,7 +367,9 @@ class Deque {
                 // -----------
 
                 /**
-                 * <your documentation>
+                 * Decrements the iterator by d
+		 * @param d the amount to decrement by
+		 * @return the iterator after being decremented
                  */
                 iterator& operator -= (difference_type d) {
                     index -= d;
@@ -357,9 +398,11 @@ class Deque {
                 // operator ==
                 // -----------
 
-                /**
-                 * <your documentation>
-                 */
+	        /**
+	         * @param lhs the iterator on the left hand side of operator ==
+		 * @param rhs the iterator on the right hand side of operator ==
+		 * @return true if lhs == rhs is true, false otherwise
+         	*/
                 friend bool operator == (const const_iterator& lhs, const const_iterator& rhs) {
                     return lhs.index == rhs.index && (&(lhs.myDeque) == &(rhs.myDeque));}
 
@@ -367,9 +410,11 @@ class Deque {
                 // operator +
                 // ----------
 
-                /**
-                 * <your documentation>
-                 */
+	        /**
+		 * Increments the iterator by rhs
+	         * @param lhs the iterator on the left hand side of operator +
+		 * @param rhs the amount to increment by
+         	*/
                 friend const_iterator operator + (const_iterator lhs, difference_type rhs) {
                     return lhs += rhs;}
 
@@ -377,9 +422,11 @@ class Deque {
                 // operator -
                 // ----------
 
-                /**
-                 * <your documentation>
-                 */
+	        /**
+		 * Decrements the iterator by rhs
+	         * @param lhs the iterator on the left hand side of operator +
+		 * @param rhs the amount to decrement by
+         	*/
                 friend const_iterator operator - (const_iterator lhs, difference_type rhs) {
                     return lhs -= rhs;}
 
@@ -388,14 +435,17 @@ class Deque {
                 // data
                 // ----
 
-                size_type index;
-                const Deque& myDeque;
+                size_type index;	//index to the item in Deque we are pointing at
+                const Deque& myDeque;	//constant reference to the pointer which the iterator is operating on
 
             private:
                 // -----
                 // valid
                 // -----
 
+	        /**
+		 * @return true if the iterator is valid
+         	*/
                 bool valid () {
                     return index >= 0 && myDeque.valid();}
 
@@ -404,9 +454,10 @@ class Deque {
                 // constructor
                 // -----------
 
-                /**
-                 * <your documentation>
-                 */
+	        /**
+	         * @param myDeque the Deque to iterator over and point to
+		 * @param index the index location in myDeque to point at initially
+         	*/
                 const_iterator (const Deque& myDeque, size_type index) : index(index), myDeque(myDeque) {
                     assert(valid());}
 
@@ -420,7 +471,8 @@ class Deque {
                 // ----------
 
                 /**
-                 * <your documentation>
+		 * @pre iterator is valid, pointing to an instance of Deque, within that Deque's range
+		 * @return the element which this iterator is currently pointing at
                  */
                 reference operator * () const {
                     return myDeque[index];}
@@ -430,7 +482,8 @@ class Deque {
                 // -----------
 
                 /**
-                 * <your documentation>
+		 * @pre iterator is valid, pointing to an instance of Deque, within that Deque's range
+		 * @return dereferenced element with access to members
                  */
                 pointer operator -> () const {
                     return &**this;}
@@ -440,7 +493,8 @@ class Deque {
                 // -----------
 
                 /**
-                 * <your documentation>
+                 * Increments the iterator one place
+		 * @return the iterator after being incremented
                  */
                 const_iterator& operator ++ () {
                     index++;
@@ -448,7 +502,8 @@ class Deque {
                     return *this;}
 
                 /**
-                 * <your documentation>
+                 * Increments the iterator one place
+		 * @return the iterator before being incremented
                  */
                 const_iterator operator ++ (int) {
                     const_iterator x = *this;
@@ -461,7 +516,8 @@ class Deque {
                 // -----------
 
                 /**
-                 * <your documentation>
+                 * Decrements the iterator one place
+		 * @return the iterator after being decremented
                  */
                 const_iterator& operator -- () {
                     index--;
@@ -469,7 +525,8 @@ class Deque {
                     return *this;}
 
                 /**
-                 * <your documentation>
+                 * Decrements the iterator one place
+		 * @return the iterator before being decremented
                  */
                 const_iterator operator -- (int) {
                     const_iterator x = *this;
@@ -482,7 +539,9 @@ class Deque {
                 // -----------
 
                 /**
-                 * <your documentation>
+                 * Increments the iterator by d
+		 * @param d the amount to increment by
+		 * @return the iterator after being incremented
                  */
                 const_iterator& operator += (difference_type d) {
                     index += d;
@@ -494,7 +553,9 @@ class Deque {
                 // -----------
 
                 /**
-                 * <your documentation>
+                 * Decrements the iterator by d
+		 * @param d the amount to decrement by
+		 * @return the iterator after being decremented
                  */
                 const_iterator& operator -= (difference_type d) {
                     index -= d;
