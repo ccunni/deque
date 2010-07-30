@@ -506,6 +506,9 @@ class Deque {
         // constructors
         // ------------
     private:
+        /**
+         * helper for constructors
+         */
         void init()
         {
             numRows = 10;
@@ -523,7 +526,8 @@ class Deque {
     
     public:
         /**
-         * <your documentation>
+         * Constructs empty Deque
+         * @param a allocator to use
          */
         explicit Deque (const allocator_type& a = allocator_type()) : a(a)
         {
@@ -531,7 +535,10 @@ class Deque {
         }
 
         /**
-         * <your documentation>
+         * Constructs deque of size s with initial values v using allocator a
+         * @param s size of deque
+         * @param v intial value to use
+         * @param a allocator to use, defaulted to allocator_type()
          */
         explicit Deque (size_type s, const_reference v = value_type(), const allocator_type& a = allocator_type()) : a(a)   
         {
@@ -541,7 +548,8 @@ class Deque {
         }
 
         /**
-         * <your documentation>
+         * Copy constructor
+         * @param that Deque to copy
          */
         Deque (const Deque& that) {
             assert(that.valid());
@@ -559,7 +567,7 @@ class Deque {
         // ----------
 
         /**
-         * <your documentation>
+         * Destructor! Cleans up allocated memory
          */
         ~Deque () {
             iterator it = this->begin();
@@ -587,17 +595,13 @@ class Deque {
         // ----------
 
         /**
-         * <your documentation>
+         * assign rhs to this
+         * @param rhs deque who's data we'll copy for assignment
          */
         Deque& operator = (const Deque& rhs) {
-            //rhs >= this -> do assignment on first this->size() elements, then copy constructor for remaining lhs elements
-            //rhs < this -> do assignment on first rhs.size() elements, pop off remainder of this. 
-
             size_type mySize = size();            
             if(rhs.size() >= size())
             {
-//                for(size_type i=0; i<mySize; i++)
-//                    (*this)[i] = rhs[i];
                 copy(rhs.begin(), rhs.begin()+mySize, begin());
                 
                 for(size_type i=mySize; i<rhs.size(); i++)
@@ -619,7 +623,8 @@ class Deque {
         // -----------
 
         /**
-         * <your documentation>
+         * @return reference to the item at index
+         * @pre index w/in range [0, size())
          */
         reference operator [] (size_type index) {
             size_type col = (beginCol + index)%10;
@@ -629,7 +634,8 @@ class Deque {
         }
 
         /**
-         * <your documentation>
+         * @return const reference to the item at index
+         * @pre index w/in range [0, size())
          */
         const_reference operator [] (size_type index) const {
             return const_cast<Deque*>(this)->operator[](index);}
@@ -639,7 +645,10 @@ class Deque {
         // --
 
         /**
-         * <your documentation>
+         * @return reference to the item at index
+         * @param index of item
+         * @pre index within range [0, size())
+         * @throws out_of_range exception if precondition not met
          */
         reference at (size_type index) {
             if(index>=size() || index<0)
@@ -648,7 +657,10 @@ class Deque {
         }
 
         /**
-         * <your documentation>
+         * @return const reference to the item at index
+         * @param index of item
+         * @pre index within range [0, size())
+         * @throws out_of_range exception if precondition not met
          */
         const_reference at (size_type index) const {
             return const_cast<Deque*>(this)->at(index);}
@@ -658,7 +670,8 @@ class Deque {
         // ----
 
         /**
-         * <your documentation>
+         * @pre not empty
+         * @return reference to last item in deque
          */
         reference back () {
         
@@ -673,7 +686,8 @@ class Deque {
             return container[endRowTmp][endColTmp];}
 
         /**
-         * <your documentation>
+         * @pre not empty
+         * @return const reference to last item in deque
          */
         const_reference back () const {
             return const_cast<Deque*>(this)->back();}
@@ -683,13 +697,13 @@ class Deque {
         // -----
 
         /**
-         * <your documentation>
+         * @return iterator pointing to start of deque
          */
         iterator begin () {
             return iterator(*this, 0);}
 
         /**
-         * <your documentation>
+         * @return const_iterator pointing to start of deque
          */
         const_iterator begin () const {
             return const_iterator(*this, 0);}
@@ -699,7 +713,7 @@ class Deque {
         // -----
 
         /**
-         * <your documentation>
+         * destroy all items in deque, leaving size = 0
          */
         void clear () {
             unsigned long mysize = size();
@@ -716,7 +730,7 @@ class Deque {
         // -----
 
         /**
-         * <your documentation>
+         * @return size == 0
          */
         bool empty () const {
             return !size();}
@@ -726,13 +740,13 @@ class Deque {
         // ---
 
         /**
-         * <your documentation>
+         * @return iterator pointing to one past the last item
          */
         iterator end () {
             return iterator(*this, size());}
 
         /**
-         * <your documentation>
+         * @return const_iterator pointing to one past the last item
          */
         const_iterator end () const {
             return const_iterator(*this, size());}
@@ -742,7 +756,9 @@ class Deque {
         // -----
 
         /**
-         * <your documentation>
+         * Erase the item at position of indicator
+         * @param it iterator where insertion is done
+         * @pre iterator it has valid position in range of [begin(), end())
          */
         iterator erase (iterator it) {
             copy(it + 1, end(), it);
@@ -756,14 +772,16 @@ class Deque {
         // -----
 
         /**
-         * <your documentation>
+         * @return reference to item at front of deque
+         * @pre not empty
          */
         reference front () {
             return container[beginRow][beginCol];            
         }
 
         /**
-         * <your documentation>
+         * @return const reference to item at front of deque
+         * @pre not empty
          */
         const_reference front () const {
             return const_cast<Deque*>(this)->front();}
@@ -773,7 +791,10 @@ class Deque {
         // ------
 
         /**
-         * <your documentation>
+         * @pre it is a valid iterator position for insertion, in range [begin(), end())
+         * @param it iterator where insertion occurs
+         * @param value value to insert
+         * @return iterator position where insertion occurred.
          */
         iterator insert (iterator it , const_reference value) {
             //moving the last element over one, takes care of resize, cursors, etc
@@ -799,7 +820,8 @@ class Deque {
         // ---
 
         /**
-         * <your documentation>
+         * Deletes the item at the back of the container
+         * @pre container not empty
          */
         void pop_back () {
             //update pointers/cursors
@@ -812,7 +834,8 @@ class Deque {
             assert(valid());}
 
         /**
-         * <your documentation>
+         * Deletes the item at the front of the container.
+         * @pre container not empty
          */
         void pop_front () {
             //destroy
@@ -830,6 +853,7 @@ class Deque {
 
         private:
         /**
+         * Helper for push methods to increase capacity by 2x.
          * determine new row ends
          * make new container
          * copy old row pointers
@@ -872,7 +896,9 @@ class Deque {
         // ----
         // push
         // ----
-
+       /**
+        * helper for push back, updates internal cursors and does capacity increases and row allocations as needed.
+        */
         void push_back_update_cursors_and_capacity()
         {
             size_type endRowTmp = endRow, endColTmp = endCol;
@@ -899,6 +925,9 @@ class Deque {
             endCol = endColTmp;
         }
 
+        /**
+         * helper for push front, updates internal cursors and does capacity increases and row allocations as needed.
+         */
         void push_front_update_cursors_and_capacity()
         {
             size_type beginRowTmp = beginRow, beginColTmp = beginCol;
@@ -938,7 +967,8 @@ class Deque {
 
 
         /**
-         * <your documentation>
+         * adds an item to back of container
+         * @param item object to be added
          */
         void push_back (const_reference item) {
             // assume that rowend  colend is always allocated in advance
@@ -955,7 +985,8 @@ class Deque {
 
 
         /**
-         * <your documentation>
+         * adds item to the front of the container
+         * @param item object to push to front. 
          */
         void push_front (const_reference item) 
         {
@@ -972,7 +1003,10 @@ class Deque {
         // ------
 
         /**
-         * <your documentation>
+         * Resizes the container. If s is smaller than the current size, the first s elements will remain.
+         * If s is bigger than the current size, new elements with value v will be added to the end.
+         * @param s the desired size
+         * @param v the value used to initialize new elements when container grows
          */
         void resize (size_type s, const_reference v = value_type()) {
             size_type mysize = size();
@@ -994,7 +1028,7 @@ class Deque {
         // ----
 
         /**
-         * <your documentation>
+         * @return the number of elements in the deque
          */
         size_type size () const {
         unsigned long size = 0;
@@ -1019,7 +1053,7 @@ class Deque {
         // ----
 
         /**
-         * <your documentation>
+         * @param that Deque to swap underlying data with
          */
         void swap (Deque& that) {
             std::swap(beginRow, that.beginRow);

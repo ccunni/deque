@@ -7,7 +7,7 @@
 
 TODO:
 
-
+- 
 -optimize copy constructor and resize
 
 - check bb for const iterator 
