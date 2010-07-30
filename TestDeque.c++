@@ -32,6 +32,26 @@ To test the program:
 
 template <typename C>
 struct TestDeque : CppUnit::TestFixture {
+
+    void test_special_cases() {
+        {
+            C x(10, 2); 
+            C y = x;
+
+//            x = x; //assignment on self
+            CPPUNIT_ASSERT(x == y);
+        }
+
+        {
+            C x(10, 2);
+            C y = x;
+
+  //          x.swap(x); //swapping with self
+
+            CPPUNIT_ASSERT(x == y);
+        }
+    }
+
     // ----------------
     // test_constructor
     // ----------------
@@ -730,6 +750,7 @@ struct TestDeque : CppUnit::TestFixture {
     // -----
 
     CPPUNIT_TEST_SUITE(TestDeque);
+    CPPUNIT_TEST(test_special_cases);
     CPPUNIT_TEST(test_constructor);
     CPPUNIT_TEST(test_equality);
     CPPUNIT_TEST(test_comparison);

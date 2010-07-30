@@ -659,6 +659,9 @@ class Deque {
          * @param rhs deque who's data we'll copy for assignment
          */
         Deque& operator = (const Deque& rhs) {
+            //if((&rhs) == this) //setting equal to ourself! do nothing
+            //    return *this;
+
             size_type mySize = size();            
             if(rhs.size() >= size())
             {
@@ -1116,6 +1119,9 @@ class Deque {
          * @param that Deque to swap underlying data with
          */
         void swap (Deque& that) {
+            //if(&that == this) //swaping w/ self!, no op
+            //    return;
+
             std::swap(beginRow, that.beginRow);
             std::swap(endRow, that.endRow);
             std::swap(beginCol, that.beginCol);
