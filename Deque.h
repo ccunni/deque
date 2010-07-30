@@ -105,9 +105,13 @@ class Deque {
          * <your documentation>
          */
         friend bool operator == (const Deque& lhs, const Deque& rhs) {
-            // <your code>
-            // you must use std::equal()
-            return true;}
+            size_type mysize = lhs.size();
+            
+            if(mysize != rhs.size())
+                return false;
+            
+            return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+        }
 
         // ----------
         // operator <
@@ -117,15 +121,15 @@ class Deque {
          * <your documentation>
          */
         friend bool operator < (const Deque& lhs, const Deque& rhs) {
-            // <your code>
-            // you must use std::lexicographical_compare()
-            return true;}
+            return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+        }
 
     private:
         // ----
         // data
         // ----
 
+        typename allocator_type::template rebind<T*>::other outer_a;
         allocator_type a;
         T** container;
         //ends are EXCLUSIVE
@@ -187,9 +191,8 @@ class Deque {
                  * <your documentation>
                  */
                 friend bool operator == (const iterator& lhs, const iterator& rhs) {
-                    // <your code>
-                    return true;}
-
+                    return lhs.index == rhs.index && (&(lhs.myDeque) == &(rhs.myDeque));
+                }
                 // ----------
                 // operator +
                 // ----------
@@ -215,7 +218,8 @@ class Deque {
                 // data
                 // ----
 
-                // <your data>
+                size_type index;
+                Deque& myDeque;
 
             private:
                 // -----
@@ -223,8 +227,8 @@ class Deque {
                 // -----
 
                 bool valid () const {
-                    // <your code>
-                    return true;}
+                    return index >= 0 && myDeque.valid();
+                }
 
             public:
                 // -----------
@@ -234,9 +238,10 @@ class Deque {
                 /**
                  * <your documentation>
                  */
-                iterator (/* <your arguments> */) {
-                    // <your code>
-                    assert(valid());}
+                iterator (Deque& myDeque, size_type index) : index(index), myDeque(myDeque)
+                {
+                    assert(valid());
+                }
 
                 // Default copy, destructor, and copy assignment.
                 // iterator (const iterator&);
@@ -251,10 +256,8 @@ class Deque {
                  * <your documentation>
                  */
                 reference operator * () const {
-                    // <your code>
-                    // dummy is just to be able to compile the skeleton, remove it
-                    static value_type dummy;
-                    return dummy;}
+                    return myDeque[index];
+                }
 
                 // -----------
                 // operator ->
@@ -274,7 +277,7 @@ class Deque {
                  * <your documentation>
                  */
                 iterator& operator ++ () {
-                    // <your code>
+                    index++;
                     assert(valid());
                     return *this;}
 
@@ -295,7 +298,7 @@ class Deque {
                  * <your documentation>
                  */
                 iterator& operator -- () {
-                    // <your code>
+                    index--;
                     assert(valid());
                     return *this;}
 
@@ -316,7 +319,7 @@ class Deque {
                  * <your documentation>
                  */
                 iterator& operator += (difference_type d) {
-                    // <your code>
+                    index += d;
                     assert(valid());
                     return *this;}
 
@@ -328,7 +331,7 @@ class Deque {
                  * <your documentation>
                  */
                 iterator& operator -= (difference_type d) {
-                    // <your code>
+                    index -= d;
                     assert(valid());
                     return *this;}};
 
@@ -358,8 +361,7 @@ class Deque {
                  * <your documentation>
                  */
                 friend bool operator == (const const_iterator& lhs, const const_iterator& rhs) {
-                    // <your code>
-                    return true;}
+                    return lhs.index == rhs.index && (&(lhs.myDeque) == &(rhs.myDeque));}
 
                 // ----------
                 // operator +
@@ -386,16 +388,16 @@ class Deque {
                 // data
                 // ----
 
-                // <your data>
+                size_type index;
+                const Deque& myDeque;
 
             private:
                 // -----
                 // valid
                 // -----
 
-                bool valid () const {
-                    // <your code>
-                    return true;}
+                bool valid () {
+                    return index >= 0 && myDeque.valid();}
 
             public:
                 // -----------
@@ -405,8 +407,7 @@ class Deque {
                 /**
                  * <your documentation>
                  */
-                const_iterator (/* <your arguments> */) {
-                    // <your code>
+                const_iterator (const Deque& myDeque, size_type index) : index(index), myDeque(myDeque) {
                     assert(valid());}
 
                 // Default copy, destructor, and copy assignment.
@@ -422,10 +423,7 @@ class Deque {
                  * <your documentation>
                  */
                 reference operator * () const {
-                    // <your code>
-                    // dummy is just to be able to compile the skeleton, remove it
-                    static value_type dummy;
-                    return dummy;}
+                    return myDeque[index];}
 
                 // -----------
                 // operator ->
@@ -445,7 +443,7 @@ class Deque {
                  * <your documentation>
                  */
                 const_iterator& operator ++ () {
-                    // <your code>
+                    index++;
                     assert(valid());
                     return *this;}
 
@@ -466,7 +464,7 @@ class Deque {
                  * <your documentation>
                  */
                 const_iterator& operator -- () {
-                    // <your code>
+                    index--;
                     assert(valid());
                     return *this;}
 
@@ -486,8 +484,8 @@ class Deque {
                 /**
                  * <your documentation>
                  */
-                const_iterator& operator += (difference_type) {
-                    // <your code>
+                const_iterator& operator += (difference_type d) {
+                    index += d;
                     assert(valid());
                     return *this;}
 
@@ -498,22 +496,21 @@ class Deque {
                 /**
                  * <your documentation>
                  */
-                const_iterator& operator -= (difference_type) {
-                    // <your code>
+                const_iterator& operator -= (difference_type d) {
+                    index -= d;
                     assert(valid());
                     return *this;}};
 
-    public:
+
         // ------------
         // constructors
         // ------------
-
-        /**
-         * <your documentation>
-         */
-        explicit Deque (const allocator_type& a = allocator_type()) : a(a){
+    private:
+        void init()
+        {
             numRows = 10;
-            container = new T*[numRows];
+
+            container = outer_a.allocate(numRows);// T*[numRows];
             fill(container, container+numRows, (T*)NULL); //NULL out outer container, always!
             
             //allocating first, ASSUMPTION will be row/col pointers are always within allocated space.
@@ -521,21 +518,40 @@ class Deque {
             beginRow = endRow = numRows/2;
             beginCol = endCol = 5;
             
-            // container[beginRow][beginCol] = T(); //TODO -- this isn't really the default behavior... just looked that way in valgrind. outside it gives random garbage i think.. check blackboard for clarification
-            assert(valid());}
+            assert(valid());
+        }
+    
+    public:
+        /**
+         * <your documentation>
+         */
+        explicit Deque (const allocator_type& a = allocator_type()) : a(a)
+        {
+            init();
+        }
 
         /**
          * <your documentation>
          */
-        explicit Deque (size_type s, const_reference v = value_type(), const allocator_type& a = allocator_type()) {
-            // <your code>
-            assert(valid());}
+        explicit Deque (size_type s, const_reference v = value_type(), const allocator_type& a = allocator_type()) : a(a)   
+        {
+            init();
+            resize(s, v);
+            assert(valid());
+        }
 
         /**
          * <your documentation>
          */
         Deque (const Deque& that) {
-            // <your code>
+            assert(that.valid());
+            
+            init();
+
+            size_type i=0;
+            while(i<that.size())           
+                push_back(that[i++]);
+            
             assert(valid());}
 
         // ----------
@@ -546,15 +562,13 @@ class Deque {
          * <your documentation>
          */
         ~Deque () {
-            //TODO finish iterator implementation
-            /*
-            Deque::iterator it = this->begin();
+            iterator it = this->begin();
             while(it != this->end())
             {
                 a.destroy(&(*it));
                 it++;
             }
-            */
+            
             
             
             for(unsigned long i=0; i<numRows; i++)
@@ -565,7 +579,7 @@ class Deque {
                 }
             }
             
-            delete [] container;
+            outer_a.deallocate(container, numRows);
             assert(valid());}
 
         // ----------
@@ -576,7 +590,27 @@ class Deque {
          * <your documentation>
          */
         Deque& operator = (const Deque& rhs) {
-            // <your code>
+            //rhs >= this -> do assignment on first this->size() elements, then copy constructor for remaining lhs elements
+            //rhs < this -> do assignment on first rhs.size() elements, pop off remainder of this. 
+
+            size_type mySize = size();            
+            if(rhs.size() >= size())
+            {
+//                for(size_type i=0; i<mySize; i++)
+//                    (*this)[i] = rhs[i];
+                copy(rhs.begin(), rhs.begin()+mySize, begin());
+                
+                for(size_type i=mySize; i<rhs.size(); i++)
+                    push_back(rhs[i]);
+            }
+            else
+            {
+                copy(rhs.begin(), rhs.end(), begin());
+                
+                while(size() != rhs.size())
+                    pop_back();
+            }
+            
             assert(valid());
             return *this;}
 
@@ -588,8 +622,10 @@ class Deque {
          * <your documentation>
          */
         reference operator [] (size_type index) {
-            bool boundsCheck = false;            
-            return at(index, boundsCheck);
+            size_type col = (beginCol + index)%10;
+            size_type row = (beginRow + ((beginCol+index)/10)) % numRows;
+            
+            return container[row][col];
         }
 
         /**
@@ -605,14 +641,11 @@ class Deque {
         /**
          * <your documentation>
          */
-        reference at (size_type index, bool boundsCheck = true) {
-            if(boundsCheck && (index>=size() || index<0))
+        reference at (size_type index) {
+            if(index>=size() || index<0)
                 throw std::out_of_range("Deque::at()"); 
-                      
-            size_type col = (beginCol + index)%10;
-            size_type row = (beginRow + ((beginCol+index)/10)) % numRows;
-            
-            return container[row][col];}
+            return (*this)[index];              
+        }
 
         /**
          * <your documentation>
@@ -628,10 +661,16 @@ class Deque {
          * <your documentation>
          */
         reference back () {
-            // <your code>
-            // dummy is just to be able to compile the skeleton, remove it
-            static value_type dummy;
-            return dummy;}
+        
+            bool changeRow = endCol == 0;
+            
+            size_type endRowTmp = endRow;
+            size_type endColTmp = (changeRow) ? 9 : (endCol - 1); //wrap around? or simple decrement
+            
+            if(changeRow)
+                endRowTmp = (endRow == 0) ? numRows - 1 : endRow - 1;      //wrap around? or simple decrement
+                        
+            return container[endRowTmp][endColTmp];}
 
         /**
          * <your documentation>
@@ -647,15 +686,13 @@ class Deque {
          * <your documentation>
          */
         iterator begin () {
-            // <your code>
-            return iterator(/* <your arguments> */);}
+            return iterator(*this, 0);}
 
         /**
          * <your documentation>
          */
         const_iterator begin () const {
-            // <your code>
-            return const_iterator(/* <your arguments> */);}
+            return const_iterator(*this, 0);}
 
         // -----
         // clear
@@ -665,7 +702,13 @@ class Deque {
          * <your documentation>
          */
         void clear () {
-            // <your code>
+            unsigned long mysize = size();
+            
+            for(unsigned long i = 0; i < mysize; i++)
+            {
+                pop_back();
+            }
+            
             assert(valid());}
 
         // -----
@@ -686,15 +729,13 @@ class Deque {
          * <your documentation>
          */
         iterator end () {
-            // <your code>
-            return iterator(/* <your arguments> */);}
+            return iterator(*this, size());}
 
         /**
          * <your documentation>
          */
         const_iterator end () const {
-            // <your code>
-            return const_iterator(/* <your arguments> */);}
+            return const_iterator(*this, size());}
 
         // -----
         // erase
@@ -703,10 +744,12 @@ class Deque {
         /**
          * <your documentation>
          */
-        iterator erase (iterator) {
-            // <your code>
+        iterator erase (iterator it) {
+            copy(it + 1, end(), it);
+            
+            pop_back();
             assert(valid());
-            return iterator();}
+            return it;}
 
         // -----
         // front
@@ -732,10 +775,24 @@ class Deque {
         /**
          * <your documentation>
          */
-        iterator insert (iterator, const_reference) {
-            // <your code>
+        iterator insert (iterator it , const_reference value) {
+            //moving the last element over one, takes care of resize, cursors, etc
+            iterator endIt = end() - 1;
+
+            push_back(back());
+            
+            while(endIt != it)
+            {
+                *endIt = *(endIt - 1);
+                endIt--;
+            }
+            
+            *(it) = value;
+            
+            //move stuff at the insert and the stuff after it back further
             assert(valid());
-            return iterator();}
+
+            return it;}
 
         // ---
         // pop
@@ -745,20 +802,33 @@ class Deque {
          * <your documentation>
          */
         void pop_back () {
-            // <your code>
+            //update pointers/cursors
+            if(endCol == 0)
+                endRow = (endRow == 0) ? numRows - 1 : endRow - 1;
+            endCol = (endCol == 0) ? 9 : endCol - 1;
+                
+            //destroy
+            a.destroy(&container[endRow][endCol]);
             assert(valid());}
 
         /**
          * <your documentation>
          */
         void pop_front () {
-            // <your code>
+            //destroy
+            a.destroy(&container[beginRow][beginCol]);
+            
+            //update pointers/cursors
+            beginCol = (beginCol + 1) % 10;
+            if(beginCol == 0)
+                beginRow = (beginRow + 1) % numRows;
             assert(valid());}
 
         // ---------------
         // double capacity
         // ---------------
 
+        private:
         /**
          * determine new row ends
          * make new container
@@ -775,7 +845,7 @@ class Deque {
             unsigned long newEndRow   = newBeginRow + numRows - 1;
             
 
-            T** containerTmp = new T*[newNumRows];
+            T** containerTmp = outer_a.allocate(newNumRows);//new T*[newNumRows];
             fill(containerTmp, containerTmp+newNumRows, (T*)NULL); //NULL out outer new container, always!
             
             if(beginRow < endRow)
@@ -794,9 +864,8 @@ class Deque {
             beginRow = newBeginRow;
             endRow   = newEndRow;
             // no need to update column end pointers. they aren't changed
-            
-            
-            delete [] container;
+
+            outer_a.deallocate(container, newNumRows/2);
             container = containerTmp;
         }
 
@@ -804,13 +873,32 @@ class Deque {
         // push
         // ----
 
-        /**
-         * <your documentation>
-         */
-        void push_back (const_reference) {
-            // <your code>
-            assert(valid());}
-        
+        void push_back_update_cursors_and_capacity()
+        {
+            size_type endRowTmp = endRow, endColTmp = endCol;
+
+            endColTmp = (endColTmp + 1) %10;
+            if(endColTmp == 0) //jump to next row
+            {
+                endRowTmp = (endRowTmp + 1) % numRows; //handles potential wrap around
+                
+                if(endRowTmp == beginRow) // do resize?
+                {
+                    double_capacity();
+                    push_back_update_cursors_and_capacity(); //start over now that we have the space
+                    return; // don't let the rest of this method execute, assumptions invalidated by resize.
+                }
+                else if(container[endRowTmp] == NULL)
+                {
+                    // allows assumption that rowend  colend is always allocated in advance
+                    container[endRowTmp] = a.allocate(10);
+                }
+            }
+            
+            endRow = endRowTmp;
+            endCol = endColTmp;
+        }
+
         void push_front_update_cursors_and_capacity()
         {
             size_type beginRowTmp = beginRow, beginColTmp = beginCol;
@@ -845,6 +933,26 @@ class Deque {
             beginRow = beginRowTmp;
             beginCol = beginColTmp;
         }
+        
+        public:
+
+
+        /**
+         * <your documentation>
+         */
+        void push_back (const_reference item) {
+            // assume that rowend  colend is always allocated in advance
+            assert(container[endRow] != (T*)NULL);
+            
+            // go ahead and do the push at the current cursor end
+            a.construct(&container[endRow][endCol], item);
+            
+            // update them to their post push states (potentially doing allocation and even resize)
+            push_back_update_cursors_and_capacity();
+            
+            assert(valid());}
+        
+
 
         /**
          * <your documentation>
@@ -867,7 +975,18 @@ class Deque {
          * <your documentation>
          */
         void resize (size_type s, const_reference v = value_type()) {
-            // <your code>
+            size_type mysize = size();
+        
+            if(s > mysize)    //grow
+            {
+                for(; mysize < s; mysize++)
+                    push_back(v);
+            }
+            else            //shrink
+            {
+                for(; mysize > s; mysize--)
+                    pop_back();
+            }
             assert(valid());}
 
         // ----
@@ -902,8 +1021,14 @@ class Deque {
         /**
          * <your documentation>
          */
-        void swap (Deque&) {
-            // <your code>
+        void swap (Deque& that) {
+            std::swap(beginRow, that.beginRow);
+            std::swap(endRow, that.endRow);
+            std::swap(beginCol, that.beginCol);
+            std::swap(endCol, that.endCol);
+            std::swap(numRows, that.numRows);
+            std::swap(container, that.container);
+                        
             assert(valid());}};
 
 #endif // Deque_h
